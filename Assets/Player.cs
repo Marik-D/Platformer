@@ -13,11 +13,17 @@ public class Player : MonoBehaviour
     public float _maxSpeed = 10f;
     public float _maxRunSpeed = 15f;
     public float _jumpImpulse = 20f;
+    public float _dashCooldown = 1f;
+    public float _dashDistance = 10f;
+    public float _dashDuration = 0.2f;
     
     private Rigidbody2D _rigidbody2D;
 
     private float _moveDirection = 0f;
     private float _lastJumpTime;
+    private float _lastDashTime;
+    private float _dashTarget;
+    private float _dashStart;
 
     // Start is called before the first frame update
     void Start()
@@ -46,13 +52,20 @@ public class Player : MonoBehaviour
             _moveDirection = 0f;
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) &&
+        if (Input.GetKeyDown(KeyCode.W) &&
             Physics2D.OverlapCircle(_groundCheck.position, 0.1f, LayerMask.GetMask("Ground")) &&
             Time.time - _lastJumpTime > 0.2f
         )
         {
             _rigidbody2D.AddForce(new Vector2(_moveDirection, 1f) * _jumpImpulse, ForceMode2D.Impulse);
             _lastJumpTime = Time.time;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && Time.time - _lastDashTime > _dashCooldown)
+        {
+            _lastDashTime = Time.time;
+            _dashStart = transform.position.x;
+            _dashTarget = _dashStart + _moveDirection * _dashDistance;
         }
     }
 
@@ -65,5 +78,12 @@ public class Player : MonoBehaviour
         var maxSpeed = Input.GetKey(KeyCode.LeftShift) ? _maxRunSpeed : _maxSpeed;
         
         _rigidbody2D.velocity = new Vector2(Mathf.Clamp(_rigidbody2D.velocity.x, -maxSpeed, maxSpeed), _rigidbody2D.velocity.y);
+
+        if (Time.time - _lastDashTime < _dashDuration)
+        {
+            var pos = transform.position;
+            pos.x = Mathf.Lerp(_dashStart, _dashTarget, (Time.time - _lastDashTime) / _dashDuration);
+            transform.position = pos;
+        }
     }
 }
