@@ -9,9 +9,10 @@ public class Player : MonoBehaviour
     public Transform groundCheck;
     
     [Header("Basic movement")]
-    public float acceleration = 40f;
-    public float runAcceleration = 60f;
-    public float breakAcceleration = 50f;
+    public float baseAcceleration = 40f;
+    public float runAccelerationMultiplier = 1.5f;
+    public float breakAccelerationMultiplier = 1.5f;
+    public float inAirAccelerationMultiplier = 0.3f;
     public float maxSpeed = 10f;
     public float maxRunSpeed = 15f;
     public float jumpImpulse = 20f;
@@ -63,7 +64,7 @@ public class Player : MonoBehaviour
         }
 
         if (Input.GetKeyDown(KeyCode.W) &&
-            Physics2D.OverlapCircle(groundCheck.position, 0.1f, LayerMask.GetMask("Ground")) &&
+            IsGrounded() &&
             Time.time - _lastJumpTime > 0.2f
         )
         {
@@ -80,11 +81,25 @@ public class Player : MonoBehaviour
         }
     }
 
+    private Collider2D IsGrounded() => Physics2D.OverlapCircle(groundCheck.position, 0.1f, LayerMask.GetMask("Ground"));
+
     private void FixedUpdate()
     {
-        var baseAcceleration = Input.GetKey(KeyCode.LeftShift) ? runAcceleration : acceleration;
-        var finalAcceleration = _moveDirection * _rigidbody2D.velocity.x > 0 ? baseAcceleration : breakAcceleration;
-        _rigidbody2D.AddForce(_moveDirection * finalAcceleration * Vector2.right, ForceMode2D.Force);
+        
+        var acceleration = baseAcceleration;
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            acceleration *= runAccelerationMultiplier;
+        }
+        if (_moveDirection * _rigidbody2D.velocity.x < 0)
+        {
+            acceleration *= breakAccelerationMultiplier;
+        }
+        if (!IsGrounded())
+        {
+            acceleration *= inAirAccelerationMultiplier;
+        }
+        _rigidbody2D.AddForce(_moveDirection * acceleration * Vector2.right, ForceMode2D.Force);
 
         var finalMaxSpeed = Input.GetKey(KeyCode.LeftShift) ? maxRunSpeed : maxSpeed;
         
