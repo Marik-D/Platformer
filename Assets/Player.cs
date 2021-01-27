@@ -7,10 +7,12 @@ public class Player : MonoBehaviour
 {
     public Transform _groundCheck;
     
-    public float _acceleration = 15f;
+    public float _acceleration = 40f;
+    public float _runAcceleration = 60f;
     public float _breakAcceleration = 50f;
     public float _maxSpeed = 10f;
-    public float _jumpImpulse = 100f;
+    public float _maxRunSpeed = 15f;
+    public float _jumpImpulse = 20f;
     
     private Rigidbody2D _rigidbody2D;
 
@@ -56,9 +58,12 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        var acceleration = _moveDirection * _rigidbody2D.velocity.x > 0 ? _acceleration : _breakAcceleration;
+        var baseAcceleration = Input.GetKey(KeyCode.LeftShift) ? _runAcceleration : _acceleration;
+        var acceleration = _moveDirection * _rigidbody2D.velocity.x > 0 ? baseAcceleration : _breakAcceleration;
         _rigidbody2D.AddForce(_moveDirection * acceleration * Vector2.right, ForceMode2D.Force);
+
+        var maxSpeed = Input.GetKey(KeyCode.LeftShift) ? _maxRunSpeed : _maxSpeed;
         
-        _rigidbody2D.velocity = new Vector2(Mathf.Clamp(_rigidbody2D.velocity.x, -_maxSpeed, _maxSpeed), _rigidbody2D.velocity.y);
+        _rigidbody2D.velocity = new Vector2(Mathf.Clamp(_rigidbody2D.velocity.x, -maxSpeed, maxSpeed), _rigidbody2D.velocity.y);
     }
 }
