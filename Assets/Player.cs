@@ -30,10 +30,12 @@ public class Player : MonoBehaviour
     private float _dashVelocity;
     private float _originalVelocity;
     private bool _inDash;
+    private TrailRenderer _trailRenderer;
 
     // Start is called before the first frame update
     void Start()
     {
+        _trailRenderer = GetComponent<TrailRenderer>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
     }
 
@@ -78,6 +80,8 @@ public class Player : MonoBehaviour
             _dashVelocity = _moveDirection * (dashDistance / dashDuration);
             _originalVelocity = _rigidbody2D.velocity.x;
             _inDash = true;
+            _trailRenderer.Clear();
+            _trailRenderer.enabled = true;
         }
     }
 
@@ -85,7 +89,6 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        
         var acceleration = baseAcceleration;
         if (Input.GetKey(KeyCode.LeftShift))
         {
@@ -114,6 +117,7 @@ public class Player : MonoBehaviour
         else if (_inDash)
         {
             _inDash = false;
+            _trailRenderer.enabled = false;
             var vel = _rigidbody2D.velocity;
             vel.x = _originalVelocity;
             _rigidbody2D.velocity = vel;
