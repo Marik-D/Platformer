@@ -5,25 +5,29 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public Transform _groundCheck;
+    public Transform groundCheck;
     
-    public float _acceleration = 40f;
-    public float _runAcceleration = 60f;
-    public float _breakAcceleration = 50f;
-    public float _maxSpeed = 10f;
-    public float _maxRunSpeed = 15f;
-    public float _jumpImpulse = 20f;
-    public float _dashCooldown = 1f;
-    public float _dashDistance = 10f;
-    public float _dashDuration = 0.2f;
+    [Header("Basic movement")]
+    public float acceleration = 40f;
+    public float runAcceleration = 60f;
+    public float breakAcceleration = 50f;
+    public float maxSpeed = 10f;
+    public float maxRunSpeed = 15f;
+    public float jumpImpulse = 20f;
+    
+    [Header("Dash")]
+    public float dashCooldown = 1f;
+    public float dashDistance = 10f;
+    public float dashDuration = 0.2f;
     
     private Rigidbody2D _rigidbody2D;
 
-    private float _moveDirection = 0f;
+    private float _moveDirection;
     private float _lastJumpTime;
     private float _lastDashTime;
-    private float _dashTarget;
-    private float _dashStart;
+    private float _dashVelocity;
+    private float _originalVelocity;
+    private bool _inDash;
 
     // Start is called before the first frame update
     void Start()
@@ -53,37 +57,45 @@ public class Player : MonoBehaviour
         }
 
         if (Input.GetKeyDown(KeyCode.W) &&
-            Physics2D.OverlapCircle(_groundCheck.position, 0.1f, LayerMask.GetMask("Ground")) &&
+            Physics2D.OverlapCircle(groundCheck.position, 0.1f, LayerMask.GetMask("Ground")) &&
             Time.time - _lastJumpTime > 0.2f
         )
         {
-            _rigidbody2D.AddForce(new Vector2(_moveDirection, 1f) * _jumpImpulse, ForceMode2D.Impulse);
+            _rigidbody2D.AddForce(new Vector2(_moveDirection, 1f) * jumpImpulse, ForceMode2D.Impulse);
             _lastJumpTime = Time.time;
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && Time.time - _lastDashTime > _dashCooldown)
+        if (Input.GetKeyDown(KeyCode.Space) && Time.time - _lastDashTime > dashCooldown)
         {
             _lastDashTime = Time.time;
-            _dashStart = transform.position.x;
-            _dashTarget = _dashStart + _moveDirection * _dashDistance;
+            _dashVelocity = _moveDirection * (dashDistance / dashDuration);
+            _originalVelocity = _rigidbody2D.velocity.x;
+            _inDash = true;
         }
     }
 
     private void FixedUpdate()
     {
-        var baseAcceleration = Input.GetKey(KeyCode.LeftShift) ? _runAcceleration : _acceleration;
-        var acceleration = _moveDirection * _rigidbody2D.velocity.x > 0 ? baseAcceleration : _breakAcceleration;
-        _rigidbody2D.AddForce(_moveDirection * acceleration * Vector2.right, ForceMode2D.Force);
+        var baseAcceleration = Input.GetKey(KeyCode.LeftShift) ? runAcceleration : acceleration;
+        var finalAcceleration = _moveDirection * _rigidbody2D.velocity.x > 0 ? baseAcceleration : breakAcceleration;
+        _rigidbody2D.AddForce(_moveDirection * finalAcceleration * Vector2.right, ForceMode2D.Force);
 
-        var maxSpeed = Input.GetKey(KeyCode.LeftShift) ? _maxRunSpeed : _maxSpeed;
+        var finalMaxSpeed = Input.GetKey(KeyCode.LeftShift) ? maxRunSpeed : maxSpeed;
         
-        _rigidbody2D.velocity = new Vector2(Mathf.Clamp(_rigidbody2D.velocity.x, -maxSpeed, maxSpeed), _rigidbody2D.velocity.y);
+        _rigidbody2D.velocity = new Vector2(Mathf.Clamp(_rigidbody2D.velocity.x, -finalMaxSpeed, finalMaxSpeed), _rigidbody2D.velocity.y);
 
-        if (Time.time - _lastDashTime < _dashDuration)
+        if (Time.time - _lastDashTime < dashDuration)
         {
-            var pos = transform.position;
-            pos.x = Mathf.Lerp(_dashStart, _dashTarget, (Time.time - _lastDashTime) / _dashDuration);
-            transform.position = pos;
+            var vel = _rigidbody2D.velocity;
+            vel.x = _dashVelocity;
+            _rigidbody2D.velocity = vel;
+        } 
+        else if (_inDash)
+        {
+            _inDash = false;
+            var vel = _rigidbody2D.velocity;
+            vel.x = _originalVelocity;
+            _rigidbody2D.velocity = vel;
         }
     }
 }
