@@ -104,9 +104,11 @@ public class Player : MonoBehaviour
         }
         _rigidbody2D.AddForce(_moveDirection * acceleration * Vector2.right, ForceMode2D.Force);
 
-        var finalMaxSpeed = Input.GetKey(KeyCode.LeftShift) ? maxRunSpeed : maxSpeed;
-        
-        _rigidbody2D.velocity = new Vector2(Mathf.Clamp(_rigidbody2D.velocity.x, -finalMaxSpeed, finalMaxSpeed), _rigidbody2D.velocity.y);
+        if (IsGrounded())
+        {
+            var finalMaxSpeed = Input.GetKey(KeyCode.LeftShift) ? maxRunSpeed : maxSpeed;
+            _rigidbody2D.velocity = new Vector2(Mathf.Clamp(_rigidbody2D.velocity.x, -finalMaxSpeed, finalMaxSpeed), _rigidbody2D.velocity.y);
+        }
 
         if (Time.time - _lastDashTime < dashDuration)
         {
