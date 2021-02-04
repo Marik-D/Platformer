@@ -12,10 +12,12 @@ public class MovingPlatform : MonoBehaviour
     public float speed = 4f;
 
     private Vector2 _initialPosition;
+    private Rigidbody2D _rigidbody2D;
 
     // Start is called before the first frame update
     void Start()
     {
+        _rigidbody2D = GetComponent<Rigidbody2D>();
         _initialPosition = transform.position;
     }
     
@@ -31,13 +33,12 @@ public class MovingPlatform : MonoBehaviour
             currentPathPosition = 2 * pathLength - currentPathPosition;
         }
 
-        var pos = (Vector3)Vector2.Lerp(_initialPosition, (Vector2) to.position, currentPathPosition / pathLength);
+        var pos = Vector2.Lerp(_initialPosition, (Vector2) to.position, currentPathPosition / pathLength);
         if (lockY)
         {
             pos.y = _initialPosition.y;
         }
 
-        pos.z = transform.position.z;
-        transform.position = pos;
+        _rigidbody2D.MovePosition(pos);
     }
 }

@@ -123,4 +123,14 @@ public class Player : MonoBehaviour
             _rigidbody2D.velocity = vel;
         }
     }
+    
+    private void OnCollisionStay2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Moving Platform"))
+        {
+            var force = (other.rigidbody.velocity - _rigidbody2D.velocity) * 0.7f;
+            Debug.Log(force.magnitude);
+            _rigidbody2D.AddForce(force);
+        }
+    }
 }
