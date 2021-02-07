@@ -34,7 +34,12 @@ public class PatrolingEnemy : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player"))
         {
-            other.rigidbody.AddForce(((other.transform.position - transform.position).normalized + Vector3.up) * 20f, ForceMode2D.Impulse);
+            var offset = other.transform.position - transform.position;
+            offset.y = 0;
+            offset.z = 0;
+            other.rigidbody.AddForce((offset.normalized + Vector3.up) * 20f, ForceMode2D.Impulse);
+
+            other.gameObject.GetComponent<PlayerHealth>().TakeDamage(1);
         }
     }
 }
