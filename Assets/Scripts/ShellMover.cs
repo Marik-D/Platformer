@@ -23,4 +23,18 @@ public class ShellMover : MonoBehaviour
     {
         transform.position += transform.right * (speed * Time.deltaTime);
     }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if(other.gameObject.CompareTag("Player"))
+        {
+            other.GetComponent<PlayerHealth>().TakeDamage(1);
+            Destroy(gameObject);
+        }
+
+        if (((1 << other.gameObject.layer) & LayerMask.GetMask("Ground")) != 0)
+        {
+            Destroy(gameObject);
+        }
+    }
 }
