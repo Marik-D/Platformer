@@ -31,10 +31,14 @@ public class PlayerMovement : MonoBehaviour
     private float _originalVelocity;
     private bool _inDash;
     private TrailRenderer _trailRenderer;
+    private Animator _animator;
+    private SpriteRenderer _spriteRenderer;
 
     // Start is called before the first frame update
     void Start()
     {
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+        _animator = GetComponent<Animator>();
         _trailRenderer = GetComponent<TrailRenderer>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
     }
@@ -63,6 +67,14 @@ public class PlayerMovement : MonoBehaviour
         else if (Input.GetKeyUp(KeyCode.D) && _moveDirection == 1f)
         {
             _moveDirection = 0f;
+        }
+        
+        _animator.SetFloat("speed", Mathf.Abs(_moveDirection));
+        _animator.SetBool("isJumping", !IsGrounded());
+
+        if (Mathf.Abs(_moveDirection) > 0.01f)
+        {
+            _spriteRenderer.flipX = _moveDirection < 0.01f;
         }
 
         if (Input.GetKeyDown(KeyCode.W) &&
