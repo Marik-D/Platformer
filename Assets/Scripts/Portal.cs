@@ -30,7 +30,7 @@ public class Portal : MonoBehaviour
             {
                 Debug.Log("portal");
                 other.transform.position =
-                    linkedPortal.transform.TransformPoint(transform.InverseTransformPoint(other.transform.position));
+                    linkedPortal.transform.TransformPoint(transform.InverseTransformPoint(other.transform.position)) + linkedPortal.transform.up * 2f;
                 other.attachedRigidbody.velocity = linkedPortal.transform.TransformVector(-localVelocity);
             }
         }

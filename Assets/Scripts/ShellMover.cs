@@ -32,7 +32,7 @@ public class ShellMover : MonoBehaviour
             Destroy(gameObject);
         }
 
-        if (((1 << other.gameObject.layer) & LayerMask.GetMask("Ground")) != 0)
+        if (other.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {
             Destroy(gameObject);
         }
